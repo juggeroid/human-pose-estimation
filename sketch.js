@@ -19,6 +19,8 @@ X2_ORIENTATION_LINE = WIDTH
 Y1_ORIENTATION_LINE = HEIGHT / 2
 Y2_ORIENTATION_LINE = HEIGHT / 2
 
+var warning_sound = new Audio('alarm_sound.wav');
+
 const KeypointNames = [
     "nose",
     "leftEye",
@@ -54,15 +56,6 @@ const utility = {
     },
 }
 
-const user_actions = {
-    Recalibrate: function(e) {
-        // 89 -- Y.
-        if (e.ctrlKey && e.key === 89) {
-            // Should be done soon enough.
-        }
-    }
-}
-
 const pipeline = {
     // Draw the skeleton. Recognizes body in full.
     DrawSkeleton: function(pose) {
@@ -77,7 +70,8 @@ const pipeline = {
                  y.position.y);
         }
     },
-    DrawDetectionPoints: function(pose) {
+    DrawDetectionPoints: function(pose)
+    {
         // Draw the eye points. They are crucial for posture detection.
         const rightEye = pose.rightEye;
         const leftEye = pose.leftEye;
@@ -97,14 +91,16 @@ const pipeline = {
         ellipse(pose.leftWrist.x, pose.leftWrist.y, 32);
 
         // Denote the other points.
-        for (let i = 0; i < pose.keypoints.length; i++) {
+        for (let i = 0; i < pose.keypoints.length; i++)
+        {
             const x = pose.keypoints[i].position.x;
             const y = pose.keypoints[i].position.y;
             fill(0, 255, 0);
             ellipse(x, y, 16, 16);
         }
     },
-    DrawOrientationLine: function() {
+    DrawOrientationLine: function()
+    {
         // Draw the orientation line.
         stroke('RED')
         line(X1_ORIENTATION_LINE,
@@ -114,33 +110,49 @@ const pipeline = {
         // Reset the stroke.
         stroke('WHITE')
     },
-    HandleEyeDiscrepancy: function(x1, x2, y1, y2) {
+    HandleEyeDiscrepancy: function(x1, x2, y1, y2)
+    {
 
         // If not calibrated, calculate the angle using atan2.
         // It requires individual calibration and now it's planned to be done.
         const orientation_angle = utility.AngleBetweenLinesAtan2(x1, x2, y1, y2, 0, WIDTH, HEIGHT / 2, HEIGHT / 2);
-
+        
         // Since we have a sign of rotation, determine the direction of original position and draw its corresponding color.
         if      (orientation_angle >=  POSTURE_ANGLE_THRESHOLD) stroke('RED');
-        else if (orientation_angle <= -POSTURE_ANGLE_THRESHOLD) stroke('YELLOW');
-        else                                                    stroke('WHITE');
+        else if (orientation_angle <= -POSTURE_ANGLE_THRESHOLD)
+        {
+            warning_sound.play();
+            stroke('YELLOW');    
+        }
+        else 
+        {
+            warning_sound.play();
+            stroke('WHITE');
+        }
 
         const correct_height_position = this.HandleEyeVerticalPosition(y1, y2);
-        if (!correct_height_position) stroke('RED')
+        if (!correct_height_position)
+        {
+            warning_sound.play();
+            stroke('RED')
+        }
         line(x2, y2, x1, y1);
 
     },
     // The second line (x3, x4); (y3, y4) is comparatively lower on the y-axis than the first one.
-    HandleEyeVerticalPosition: function(y1, y2) {
+    HandleEyeVerticalPosition: function(y1, y2)
+    {
         return y1 <= Y1_ORIENTATION_LINE || y2 <= Y2_ORIENTATION_LINE;
     }
 }
 
-function setup() {
+function setup()
+{
     const canvas = createCanvas(WIDTH, HEIGHT);
     video = createCapture(VIDEO);
     video.hide();
-    let options = {
+    let options =
+    {
         // ResNet50 is the best architecture available at the moment.
         architecture: 'ResNet50',
         // Detection type is for single person.
@@ -151,18 +163,22 @@ function setup() {
     poseNet.on('pose', got_poses);
 }
 
-function got_poses(poses) {
-    if (poses.length > 0) {
+function got_poses(poses)
+{
+    if (poses.length > 0)
+    {
         pose = poses[0].pose;
         skeleton = poses[0].skeleton;
     }
 }
 
-function load_callback() {
+function load_callback()
+{
     console.log('poseNet ready');
 }
 
-function draw(canvas) {
+function draw(canvas)
+{
     image(video, 0, 0);
     if (pose) {
         const rightEye = pose.rightEye;
@@ -174,9 +190,4 @@ function draw(canvas) {
         pipeline.DrawOrientationLine();
         pipeline.HandleEyeDiscrepancy(rightEye.x, leftEye.x, rightEye.y, leftEye.y);
     }
-}
-
-function play_sound() {
-    const audio = new Audio(AUDIO_NAME);
-    audio.play();
 }
