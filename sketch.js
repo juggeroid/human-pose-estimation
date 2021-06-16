@@ -118,17 +118,17 @@ const pipeline = {
         const orientation_angle = utility.AngleBetweenLinesAtan2(x1, x2, y1, y2, 0, WIDTH, HEIGHT / 2, HEIGHT / 2);
         
         // Since we have a sign of rotation, determine the direction of original position and draw its corresponding color.
-        if      (orientation_angle >=  POSTURE_ANGLE_THRESHOLD) stroke('RED');
+        if (orientation_angle >= POSTURE_ANGLE_THRESHOLD)
+        { 
+            stroke('RED');
+            warning_sound.play();
+        }
         else if (orientation_angle <= -POSTURE_ANGLE_THRESHOLD)
         {
-            warning_sound.play();
             stroke('YELLOW');    
-        }
-        else 
-        {
             warning_sound.play();
-            stroke('WHITE');
         }
+        else stroke('WHITE');
 
         const correct_height_position = this.HandleEyeVerticalPosition(y1, y2);
         if (!correct_height_position)
