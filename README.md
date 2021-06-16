@@ -14,7 +14,7 @@ Training routine was deemed to be impossible due to lack of the computational re
 
 **Instructions**
 1. ``git clone https://github.com/juggeroid/human-pose-estimation.git``
-2. Launch `index.html` via Google Chrome
+2. Run `index.html` via Google Chrome, allow the video recording
 3. Rotate the head
 4. ???
 5. profit 
