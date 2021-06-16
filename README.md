@@ -10,6 +10,8 @@ You've been warned.
 1. Python API + OpenPose
 2. Embedded Qt Interface (somewhat tedious, but could be done).
 
+Training routine was deemed to be impossible due to lack of the computational resources.
+
 **Instructions**
 1. ``git clone https://github.com/juggeroid/human-pose-estimation.git``
 2. Launch `index.html` via Google Chrome
